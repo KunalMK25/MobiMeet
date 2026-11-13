@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * verify.js — static verification for MetroMeet AI's module graph.
+ * verify.js — static verification for MobiMeet's module graph.
  * Checks, without needing a browser or bundler:
  *   1. Every .js file under src/ parses (no syntax errors).
  *   2. Every relative import resolves to a real file.
@@ -14,20 +14,25 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const srcDir = join(root, 'src');
+// Every first-party JS root is verified: the shared source, the web app, serverless/API entry, scripts and tests.
+const ROOTS = ['src', 'app', 'api', 'scripts', 'tests'].map(d => join(root, d));
 
 function walk(dir) {
   let out = [];
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) out = out.concat(walk(full));
-    else if (entry.endsWith('.js')) out.push(full);
+    else if (entry.endsWith('.js') || entry.endsWith('.mjs')) out.push(full);
   }
   return out;
 }
 
-const files = walk(srcDir);
 let failed = false;
+const files = [...ROOTS.flatMap(r => { try { return walk(r); } catch { return []; } }), join(root, 'sw.js')];
+
+// Case-insensitive filesystems (macOS/Windows) silently merge names that differ only by case.
+const seen = new Map();
+for (const f of files) { const k = f.toLowerCase(); if (seen.has(k)) { failed = true; console.error(`✗ Case-colliding file names: ${relative(root, seen.get(k))} / ${relative(root, f)}`); } seen.set(k, f); }
 
 console.log(`Checking ${files.length} module(s)...\n`);
 
@@ -53,7 +58,7 @@ for (const f of files) {
   while ((m = importRe.exec(content))) {
     const spec = m[1] || m[2];
     let resolved = normalize(join(base, spec));
-    if (!resolved.endsWith('.js')) resolved += '.js';
+    if (!resolved.endsWith('.js') && !resolved.endsWith('.mjs')) resolved += '.js';
     if (!files.includes(resolved)) {
       failed = true;
       console.error(`✗ Broken import: ${relative(root, f)} → "${spec}" (resolved to ${relative(root, resolved)}, which doesn't exist)`);

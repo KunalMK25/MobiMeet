@@ -5,3 +5,10 @@ dist/
 !.env.example
 npm-debug.log*
 *.log
+
+# local dev data + tooling
+.data/
+.claude/
+.DS_Store
+.private-denylist
+.neon

@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 import { ST } from '../data/stations.js';
 import { AM } from '../data/sequences.js';
 import { friends, COLORS, setLastResult } from '../rendering/state.js';
@@ -36,12 +37,12 @@ export function renderFriends(){
   document.getElementById('findBtn').disabled=friends.length<2;
   el.innerHTML=friends.map((f,i)=>`
     <div class="fc">
-      <div class="fc-av" style="background:${f.color}22;color:${f.color}">${f.name[0].toUpperCase()}</div>
+      <div class="fc-av" style="background:${f.color}22;color:${f.color}">${escapeHtml(f.name[0].toUpperCase())}</div>
       <div class="fc-inf">
-        <div class="fc-nm">${f.name}</div>
-        <div class="fc-loc">📍 ${f.area}</div>
+        <div class="fc-nm">${escapeHtml(f.name)}</div>
+        <div class="fc-loc">📍 ${escapeHtml(f.area)}</div>
       </div>
-      <div class="fc-stn" style="background:${f.st.co}18;color:${f.st.co};border:1px solid ${f.st.co}35">${f.stKey.split(' ')[0]}</div>
+      <div class="fc-stn" style="background:${f.st.co}18;color:${f.st.co};border:1px solid ${f.st.co}35">${escapeHtml(f.stKey.split(' ')[0])}</div>
       <button class="fc-rm" onclick="removeFriend(${i})">×</button>
     </div>`).join('');
 }

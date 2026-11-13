@@ -1,6 +1,6 @@
 # Context-Aware AI Assistant
 
-MetroMeet AI's assistant is not a generic chatbot bolted onto the app — it's
+MobiMeet's assistant is not a generic chatbot bolted onto the app — it's
 grounded in exactly what the app has already computed, and it never invents
 numbers.
 

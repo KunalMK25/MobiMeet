@@ -1,11 +1,11 @@
 {
   "name": "metromeet-ai",
-  "version": "6.0.0",
-  "description": "A fairness-first meetup planner for the Bangalore Namma Metro — finds the station where no one has to travel unfairly far, with a context-aware AI assistant, live nearby-places data, and a schematic metro map renderer.",
+  "version": "7.0.0-dev",
+  "description": "MobiMeet — personalised group meetup planning for Bengaluru by Metro or Bike: fairness-first optimisation, secure groups and invitations, road-network routing, venue discovery and explainable recommendations. Evolution of MobiMeet.",
   "type": "module",
   "private": true,
   "license": "MIT",
-  "author": "MetroMeet AI Contributors",
+  "author": "MobiMeet Contributors",
   "homepage": "https://github.com/<your-username>/metromeet-ai#readme",
   "repository": {
     "type": "git",
@@ -15,28 +15,49 @@
     "url": "https://github.com/<your-username>/metromeet-ai/issues"
   },
   "keywords": [
-    "namma-metro",
     "bangalore",
     "bmrcl",
+    "canvas",
     "dijkstra",
-    "graph-algorithms",
-    "meetup-planner",
-    "route-planner",
-    "vanilla-js",
     "es-modules",
-    "canvas"
+    "fairness",
+    "graph-algorithms",
+    "group-planning",
+    "meetup-planner",
+    "mobimeet",
+    "namma-metro",
+    "osrm",
+    "postgres",
+    "route-planner",
+    "vanilla-js"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "serve -l 3000 .",
     "build": "node scripts/build.js",
     "start": "serve -l 3000 dist",
-    "test": "node scripts/verify.js",
-    "verify": "node scripts/verify.js"
+    "test": "node scripts/verify.js && node --test tests/*.test.js",
+    "verify": "node scripts/verify.js",
+    "test:unit": "node --test tests/*.test.js",
+    "test:pg": "node scripts/test-pg.mjs",
+    "dev:full": "node scripts/dev-server.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "lint": "eslint .",
+    "check": "npm run lint && npm test",
+    "env:check": "node scripts/check-env.mjs",
+    "llm:check": "node scripts/llm-check.mjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "jsdom": "^31.0.0",
     "serve": "^14.2.3"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

@@ -1,5 +1,5 @@
 import { ST } from '../data/stations.js';
-import { SEQS } from '../data/sequences.js';
+import { LINE_NAMES, activeEdges } from '../data/network.js';
 
 // ═══════════════════════════════════════════════════════════
 //  GRAPH-BASED ROUTING ENGINE — WEIGHTED GRAPH + DIJKSTRA
@@ -33,7 +33,10 @@ export const DEFAULT_IX_PENALTY = 5;  // fallback transfer penalty for any futur
 // Line definitions — the graph, Dijkstra routing, and interchange
 // detection all derive from this map. To add a new line (e.g. a
 // future Blue or Pink Line), just add its station sequence here.
-export const LINES = { Purple: SEQS.Purple, Green: SEQS.Green, Yellow: SEQS.Yellow };
+// Lines/edges now come from the status-driven network definition (data/network.js):
+// only edges in an ACTIVE section exist, so planned/under-construction sections can
+// never appear in a route.
+export const LINES = Object.fromEntries(LINE_NAMES.map(l => [l, null]));
 
 export const nodeId = (station, line) => `${station}::${line}`;
 
@@ -48,6 +51,8 @@ export const nodeId = (station, line) => `${station}::${line}`;
  *   by "interchange edges" carrying the transfer penalty. This is
  *   what lets Dijkstra treat a same-line trip and a line-changing
  *   trip correctly without any hardcoded per-station logic.
+ * @param {number} [now] - instant used to decide which sections are active (default: load time)
+ * @param {{interchangeScale?:number}} [opts] - multiplies transfer penalties (path-choice strategies only)
  * @returns {{graph: Object<string,Array>, stationLines: Object<string,Set<string>>}}
  *   graph: nodeId ("Station::Line") -> [{to, cost, line, station}]
  *   stationLines: station name -> Set of line names serving it
@@ -56,21 +61,19 @@ export const nodeId = (station, line) => `${station}::${line}`;
  * @sideEffects None — pure function, reads only the module-level
  *   ST/SEQS/IX_PENALTY/DEFAULT_IX_PENALTY constants above it.
  */
-export function buildGraph() {
+export function buildGraph(now = Date.now(), { interchangeScale = 1 } = {}) {
   const graph = {};
   const stationLines = {};
 
   const ensureNode = (id) => { if (!graph[id]) graph[id] = []; };
 
-  for (const [lineName, seq] of Object.entries(LINES)) {
-    for (const st of seq) {
-      if (!ST[st]) continue;
-      if (!stationLines[st]) stationLines[st] = new Set();
-      stationLines[st].add(lineName);
-    }
-    for (let i = 0; i < seq.length - 1; i++) {
-      const a = seq[i], b = seq[i + 1];
+  for (const lineName of LINE_NAMES) {
+    for (const [a, b] of activeEdges(lineName, now)) {
       if (!ST[a] || !ST[b]) continue;
+      for (const st of [a, b]) {
+        if (!stationLines[st]) stationLines[st] = new Set();
+        stationLines[st].add(lineName);
+      }
       const na = nodeId(a, lineName), nb = nodeId(b, lineName);
       ensureNode(na); ensureNode(nb);
       // Edge weight = travel time only. Line is carried on the edge
@@ -88,7 +91,9 @@ export function buildGraph() {
   for (const [station, lineSet] of Object.entries(stationLines)) {
     const lineArr = Array.from(lineSet);
     if (lineArr.length < 2) continue; // single-line station: no penalty edges
-    const penalty = IX_PENALTY[station] ?? DEFAULT_IX_PENALTY;
+    // interchangeScale ≠ 1 is used ONLY to steer path choice for route strategies (see optimizer/metroEngine.js);
+    // the time/fare reported to users is always recomputed on the real (scale 1) costs.
+    const penalty = (IX_PENALTY[station] ?? DEFAULT_IX_PENALTY) * interchangeScale;
     for (const fromLine of lineArr) {
       for (const toLine of lineArr) {
         if (fromLine === toLine) continue;
@@ -102,5 +107,6 @@ export function buildGraph() {
   return { graph, stationLines };
 }
 
-export const { graph: GRAPH, stationLines: STATION_LINES } = buildGraph();
+export const DEFAULT_NETWORK = buildGraph();
+export const { graph: GRAPH, stationLines: STATION_LINES } = DEFAULT_NETWORK;
 

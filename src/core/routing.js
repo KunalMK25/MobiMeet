@@ -1,4 +1,4 @@
-import { IX_PENALTY, DEFAULT_IX_PENALTY } from './graph.js';
+import { IX_PENALTY, DEFAULT_IX_PENALTY, STOP_MIN } from './graph.js';
 import { calcFare } from './fares.js';
 
 // Reconstruct the detailed (station, line) chain for a route, then
@@ -14,6 +14,17 @@ export function getDetailedPath(dResult, src, dst) {
     cur = dResult.prev[cur];
   }
   return chain;
+}
+
+// Real travel minutes of a detailed (station, line) chain: STOP_MIN per hop on a line, the station's transfer
+// penalty per interchange — independent of whatever costs were used to CHOOSE the path.
+export function realPathCost(detailed) {
+  let t = 0;
+  for (let i = 0; i < detailed.length - 1; i++) {
+    const a = detailed[i], b = detailed[i + 1];
+    t += a.station === b.station ? (IX_PENALTY[a.station] ?? DEFAULT_IX_PENALTY) : STOP_MIN;
+  }
+  return t;
 }
 
 // Reconstruct path (plain station keys) from src to dst

@@ -62,6 +62,15 @@ export const LINE_CHECKPOINTS = {
     {station:'Electronic City',   x:626.6, y:754.5},
     {station:'Bommasandra',       x:703.4, y:812.1},
   ],
+  // Pink (elevated section). Branches from the Yellow interchange at Jayadeva Hospital
+  // (same x,y as Yellow's interpolated position there) and runs south to Kalena Agrahara.
+  // Only checkpoints whose station is in the line's *active* sequence are used, so this
+  // is inert until the section opens.
+  Pink: [
+    {station:'Kalena Agrahara',   x:455,   y:800},
+    {station:'Jayadeva Hospital', x:442.9, y:641.5}, // ⇄ Yellow
+    {station:'Tavarekere',        x:500,   y:600},
+  ],
 };
 
 // Evenly place every station in `seq` along the straight segments

@@ -1,3 +1,4 @@
+import { formatChatText } from '../utils/html.js';
 import { FEATURE_FLAGS } from '../config/FeatureFlags.js';
 import { Logger } from '../diagnostics/Logger.js';
 import { PerfMonitor } from '../diagnostics/PerformanceMonitor.js';
@@ -15,7 +16,7 @@ export function addMsg(role,txt){
   const box=document.getElementById('msgs');
   const d=document.createElement('div');
   d.className=`msg ${role}`;
-  d.innerHTML=`<div class="bubble">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="msg-t">${role==='user'?'You':'MetroBot'} · ${fmtT()}</div>`;
+  d.innerHTML=`<div class="bubble">${formatChatText(txt)}</div><div class="msg-t">${role==='user'?'You':'MetroBot'} · ${fmtT()}</div>`;
   box.appendChild(d);box.scrollTop=box.scrollHeight;
 }
 export function addTyping(){

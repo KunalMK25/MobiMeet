@@ -1,4 +1,4 @@
-# Contributing to MetroMeet AI
+# Contributing to MobiMeet
 
 Thanks for considering a contribution! This project intentionally stays
 small, build-tool-free, and dependency-light — please read the notes below

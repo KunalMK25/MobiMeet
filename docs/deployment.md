@@ -1,6 +1,8 @@
-# Deployment
+# Deployment (the original static Metro planner)
 
-MetroMeet AI is a **static, build-tool-free site**: `index.html` plus native
+> **MobiMeet update:** this page describes the original static deployment, which is unchanged — that site still needs **no environment variables**. The multi-user MobiMeet app adds a serverless API and a database; its setup, variables and checklist are in [`../DEPLOYMENT.md`](../DEPLOYMENT.md), and the remaining decisions are listed at the end of that page.
+
+MobiMeet is a **static, build-tool-free site**: `index.html` plus native
 ES modules under `src/`. There is nothing to bundle, transpile, or compile —
 `npm run build` just assembles a clean `dist/` folder (a straight copy).
 

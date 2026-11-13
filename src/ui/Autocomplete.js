@@ -1,4 +1,6 @@
-export const STATION_OPTIONS = [
+import { escapeHtml } from '../utils/html.js';
+import { ST } from '../data/stations.js';
+const ALL_STATION_OPTIONS = [
   {v:'Whitefield',l:'Whitefield (Kadugodi)',line:'Purple'},
   {v:'Hopefarm',l:'Hopefarm Channasandra',line:'Purple'},
   {v:'Kadugodi Tree Park',l:'Kadugodi Tree Park',line:'Purple'},
@@ -63,6 +65,7 @@ export const STATION_OPTIONS = [
   {v:'Yelachenahalli',l:'Yelachenahalli',line:'Green'},
   {v:'Konanakunte',l:'Konanakunte Cross',line:'Green'},
   {v:'Doddakallasandra',l:'Doddakallasandra',line:'Green'},
+  {v:'Vajarahalli',l:'Vajarahalli',line:'Green'},
   {v:'Thalaghattapura',l:'Thalaghattapura',line:'Green'},
   {v:'Silk Institute',l:'Silk Institute (south terminal)',line:'Green'},
   {v:'Ragigudda',l:'Ragigudda',line:'Yellow'},
@@ -80,7 +83,21 @@ export const STATION_OPTIONS = [
   {v:'Huskur Road',l:'Huskur Road',line:'Yellow'},
   {v:'Hebbagodi',l:'Biocon Hebbagodi',line:'Yellow'},
   {v:'Bommasandra',l:'Delta Electronics Bommasandra',line:'Yellow'},
+  {v:'Kalena Agrahara',l:'Kalena Agrahara (Pink terminal)',line:'Pink'},
+  {v:'Hulimavu',l:'Hulimavu',line:'Pink'},
+  {v:'Bilekahalli IIMB',l:'Bilekahalli / IIMB',line:'Pink'},
+  {v:'JP Nagar 4th Phase',l:'JP Nagar 4th Phase (NS Palya)',line:'Pink'},
+  {v:'Tavarekere',l:'Tavarekere (S.G. Palya)',line:'Pink'},
 ];
+
+// Only stations that are operational right now are selectable; Pink options
+// appear automatically once the Pink section's open date passes (data/network.js).
+const STATION_KEY_FOR_OPTION = { Konanakunte:'Konanakunte Cross', Hebbagodi:'Biocon Hebbagodi', 'KR Puram':'Krishnarajapura' };
+export const STATION_OPTIONS = ALL_STATION_OPTIONS.filter(o => line_isLive(o));
+function line_isLive(o){
+  if (o.line !== 'Pink') return true;
+  return !!ST[STATION_KEY_FOR_OPTION[o.v] || o.v]?.op;
+}
 
 // Precomputed once at load: lowercase search text + word-initial
 // "abbreviation" per station (e.g. "MG Road" → initials "mr", but
@@ -103,9 +120,7 @@ export function filterStations(query) {
   return STATION_SEARCH_INDEX.filter(s => s.searchText.includes(q) || s.initials.includes(q));
 }
 
-export function escapeHtml(s){
-  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-}
+export { escapeHtml };
 
 // Wraps the matching portion of a label in <mark> for highlighting
 export function highlightStationMatch(label, query){

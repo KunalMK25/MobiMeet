@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/html.js';
 import { ST } from '../data/stations.js';
 import { SEQ_COLOR } from '../data/colors.js';
 import { TYPE_EMOJI } from '../data/places-db.js';
@@ -5,11 +6,17 @@ import { FEATURE_FLAGS } from '../config/FeatureFlags.js';
 import { ErrorBoundary } from '../diagnostics/ErrorBoundary.js';
 import { findOptimal } from '../core/optimization.js';
 import { getRouteDetail, collapseToStationLine } from '../core/routing.js';
-import { NEARBY_PLACE_PROVIDERS, getNearbyPlacesForStation } from '../places/PlacesService.js';
+import { NEARBY_PLACE_PROVIDERS } from '../places/PlacesService.js';
+import { getMeetupPlaces, describeSource, PROVENANCE_LABEL } from '../places/MeetupPlaces.js';
+import { RADIUS, categoryLabel } from '../venues/core.js';
 import { SCHEMATIC, SCHEMATIC_W, SCHEMATIC_H } from '../rendering/schematic.js';
 import { canvas, setViewport } from '../rendering/viewport.js';
 import { draw } from '../rendering/renderer.js';
 import { friends, vibe, lastResult, setVibeState, setLastResult, setMeetContext, setLastDisplayedPlaces } from '../rendering/state.js';
+
+// Search radius for the places list (km). Configurable from the drawer; default ≈ 2.5 km.
+let placesRadiusKm = RADIUS.defaultKm;
+export function setPlacesRadius(km){ placesRadiusKm = Number(km) || RADIUS.defaultKm; if (lastResult) fetchPlaces(lastResult); }
 
 export function setVibe(btn,v){
   setVibeState(v);
@@ -20,7 +27,7 @@ export function setVibe(btn,v){
 export async function findMeet(){
   if(friends.length<2)return;
   document.getElementById('drawerContent').innerHTML=
-    `<div class="loading-row"><div class="spin"></div>Running graph routing across 83 stations…</div>`;
+    `<div class="loading-row"><div class="spin"></div>Running graph routing across ${Object.values(ST).filter(x=>x.op).length} stations…</div>`;
   openDrawer();
 
   // Use graph-based Dijkstra algorithm
@@ -63,7 +70,7 @@ export async function findMeet(){
   const routeRows = friends.map((f,i)=>{
     const rd = routeDetails[i];
     const fare = rd.fare;
-    const hintHtml = rd.hints.map(h=>`<div class="r-note">🔄 ${h}</div>`).join('');
+    const hintHtml = rd.hints.map(h=>`<div class="r-note">🔄 ${escapeHtml(h)}</div>`).join('');
     const sameStation = f.stKey === opt.key;
 
     // ── Full station-by-station route panel (collapsed by default) ──
@@ -74,7 +81,7 @@ export async function findMeet(){
       const routeChips = collapseToStationLine(rd.detailed).map(s=>{
         const c = SEQ_COLOR[s.line] || 'var(--text)';
         const isIx = rd.interchangeStations.includes(s.station);
-        return `<span style="font-family:'DM Mono',monospace;font-size:.58rem;padding:2px 6px;border-radius:4px;background:${c}18;color:${c};border:1px solid ${c}40${isIx?`;box-shadow:0 0 0 1px ${c}`:''}">${s.station}</span>`;
+        return `<span style="font-family:'DM Mono',monospace;font-size:.58rem;padding:2px 6px;border-radius:4px;background:${c}18;color:${c};border:1px solid ${c}40${isIx?`;box-shadow:0 0 0 1px ${c}`:''}">${escapeHtml(s.station)}</span>`;
       }).join('<span style="color:var(--muted);font-size:.55rem">→</span>');
 
       const lineBadges = rd.linesUsed.map(l=>{
@@ -84,13 +91,13 @@ export async function findMeet(){
 
       const ixSummary = rd.noInterchange
         ? `<span style="color:var(--green)">✓ No Interchange</span>`
-        : `<span style="color:var(--yellow)">🔄 ${rd.interchangeCount} Interchange${rd.interchangeCount>1?'s':''} — ${rd.interchangeStations.join(', ')}</span>`;
+        : `<span style="color:var(--yellow)">🔄 ${rd.interchangeCount} Interchange${rd.interchangeCount>1?'s':''} — ${escapeHtml(rd.interchangeStations.join(', '))}</span>`;
 
       fullDetailHtml = `
       <div id="rdet-${i}" style="display:none;width:100%;margin-top:8px;padding:10px 12px;background:rgba(4,6,14,.5);border:1px solid var(--bdr2);border-radius:8px">
         <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted2)">
-          <span><strong style="color:var(--text)">Origin:</strong> ${f.stKey}</span>
-          <span><strong style="color:var(--text)">Destination:</strong> ${opt.key}</span>
+          <span><strong style="color:var(--text)">Origin:</strong> ${escapeHtml(f.stKey)}</span>
+          <span><strong style="color:var(--text)">Destination:</strong> ${escapeHtml(opt.key)}</span>
         </div>
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-bottom:9px">${routeChips}</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px">${lineBadges}</div>
@@ -104,12 +111,12 @@ export async function findMeet(){
     }
 
     return `<div class="rrow">
-      <div class="r-av" style="background:${f.color}22;color:${f.color}">${f.name[0].toUpperCase()}</div>
-      <div class="r-nm">${f.name}</div>
+      <div class="r-av" style="background:${f.color}22;color:${f.color}">${escapeHtml(f.name[0].toUpperCase())}</div>
+      <div class="r-nm">${escapeHtml(f.name)}</div>
       <div class="r-arr">→</div>
-      <span class="r-st o">${f.stKey.split(' ')[0]}</span>
+      <span class="r-st o">${escapeHtml(f.stKey.split(' ')[0])}</span>
       <div class="r-arr">→→</div>
-      <span class="r-st d">${opt.key.split(' ')[0]}</span>
+      <span class="r-st d">${escapeHtml(opt.key.split(' ')[0])}</span>
       <div class="r-tm">~${rd.costMin} min</div>
       <div style="width:100%;padding-left:30px;margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <span style="font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">${sameStation?'Already here!':rd.stopCount+' stops'}</span>
@@ -126,7 +133,7 @@ export async function findMeet(){
     <div class="opt-banner">
       <div style="font-size:1.6rem">🚇</div>
       <div style="flex:1">
-        <div class="opt-name">${opt.key} ${nb}${ib}</div>
+        <div class="opt-name">${escapeHtml(opt.key)} ${nb}${ib}</div>
         <div class="opt-sub">
           <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${opt.co};margin-right:5px;vertical-align:middle"></span>
           ${opt.li} Line · Fairness-optimised meetpoint
@@ -171,16 +178,22 @@ export async function findMeet(){
         Smart Card<br><span style="color:var(--yellow);font-size:.78rem;font-weight:700">10% OFF</span><br>every ride
       </div>
     </div>
-    <div class="lbl">Nearby Places <span style="font-size:.55rem;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:0">5km radius · AI-curated + live data</span></div>
+    <div class="lbl">Nearby Places
+      <select id="placesRadius" aria-label="Search radius" onchange="setPlacesRadius(this.value)" style="margin-left:8px;background:var(--card2);color:var(--text);border:1px solid var(--bdr2);border-radius:6px;font:inherit;font-size:.62rem;padding:2px 4px">
+        ${RADIUS.optionsKm.map(k=>`<option value="${k}" ${k===placesRadiusKm?'selected':''}>within ${k} km</option>`).join('')}
+      </select></div>
     <div class="vrow" style="margin:7px 0">
       <button class="vc ${vibe==='all'?'on':''}" onclick="setVibe(this,'all')">🌟 All</button>
       <button class="vc ${vibe==='mall'?'on':''}" onclick="setVibe(this,'mall')">🛍️ Mall</button>
-      <button class="vc ${vibe==='cafe'?'on':''}" onclick="setVibe(this,'cafe')">☕ Cafe</button>
-      <button class="vc ${vibe==='arcade'?'on':''}" onclick="setVibe(this,'arcade')">🕹️ Arcade</button>
       <button class="vc ${vibe==='restaurant'?'on':''}" onclick="setVibe(this,'restaurant')">🍽️ Food</button>
+      <button class="vc ${vibe==='cafe'?'on':''}" onclick="setVibe(this,'cafe')">☕ Cafe</button>
+      <button class="vc ${vibe==='bar'?'on':''}" onclick="setVibe(this,'bar')">🍻 Pubs</button>
+      <button class="vc ${vibe==='club'?'on':''}" onclick="setVibe(this,'club')">🪩 Clubs</button>
+      <button class="vc ${vibe==='entertainment'?'on':''}" onclick="setVibe(this,'entertainment')">🎳 Fun</button>
       <button class="vc ${vibe==='park'?'on':''}" onclick="setVibe(this,'park')">🌳 Park</button>
-      <button class="vc ${vibe==='bar'?'on':''}" onclick="setVibe(this,'bar')">🍻 Bar</button>
+      <button class="vc ${vibe==='attraction'?'on':''}" onclick="setVibe(this,'attraction')">📍 Sights</button>
     </div>
+    <div id="placesMeta" role="status" style="font-size:.6rem;font-family:'DM Mono',monospace;color:var(--muted2);margin-bottom:6px"></div>
     <div id="placesGrid" class="pg"></div>`;
 
   fetchPlaces(lastResult);
@@ -197,14 +210,17 @@ export async function fetchPlaces(r) {
   // provider chain — when off, go straight to the static provider.
   // Either way, a failure degrades gracefully via ErrorBoundary
   // rather than leaving the drawer stuck on "Finding nearby spots…".
-  const places = await ErrorBoundary.guardAsync('Places', async () => {
+  // Coordinate-based search (radius from the selector). FEATURE_FLAGS.LIVE_PLACES off → the saved snapshot / sample only.
+  const result = await ErrorBoundary.guardAsync('Places', async () => {
     return FEATURE_FLAGS.LIVE_PLACES
-      ? await getNearbyPlacesForStation(stationKey)
-      : await NEARBY_PLACE_PROVIDERS.static.getNearbyPlaces(stationKey, ['all']);
-  }, [], { stationKey });
+      ? await getMeetupPlaces(stationKey, { radiusKm: placesRadiusKm })
+      : { places: await NEARBY_PLACE_PROVIDERS.static.getNearbyPlaces(stationKey, ['all']), meta: { provenance: 'sample', radiusKm: placesRadiusKm, warnings: [] } };
+  }, { places: [], meta: { provenance: 'snapshot', radiusKm: placesRadiusKm, warnings: [] } }, { stationKey });
 
-  const filtered = vibe === 'all' ? places : places.filter(p => p.category === vibe);
-  renderPlaces(filtered.length ? filtered : places);
+  const metaEl = document.getElementById('placesMeta');
+  if (metaEl) { const d = describeSource(result.meta); metaEl.textContent = `Around ${stationKey} · within ${result.meta.radiusKm} km · ${d.text}`; metaEl.style.color = d.tone === 'ok' ? 'var(--green)' : 'var(--yellow)'; }
+  const filtered = vibe === 'all' ? result.places : result.places.filter(p => p.category === vibe);
+  renderPlaces(filtered);          // an empty category says so — it never silently shows unrelated categories
 }
 
 export function gmapsUrl(name, stationKey) {
@@ -220,7 +236,7 @@ export function renderPlaces(places) {
   setLastDisplayedPlaces(places || []);
   const grid = document.getElementById('placesGrid');
   if (!grid || !places.length) {
-    if (grid) grid.innerHTML = `<div style="color:var(--muted2);font-size:.78rem;padding:16px;text-align:center">No ${vibe} spots found nearby.<br>Try <strong>All</strong> vibe!</div>`;
+    if (grid) grid.innerHTML = `<div style="color:var(--muted2);font-size:.78rem;padding:16px;text-align:center">No ${vibe==='all'?'':escapeHtml(categoryLabel(vibe).toLowerCase())+' '}places found in this radius.<br>Try <strong>All</strong> or a wider radius.</div>`;
     return;
   }
   const stKey = lastResult?.opt?.key || '';
@@ -228,19 +244,23 @@ export function renderPlaces(places) {
     const mapsUrl = gmapsUrl(p.name, stKey);
     const emoji = p.emoji || TYPE_EMOJI[p.category] || '📍';
     return `
-    <div class="pc" style="animation-delay:${i*.05}s" onclick="window.open('${mapsUrl}','_blank')">
+    <div class="pc" style="animation-delay:${i*.05}s" data-url="${escapeHtml(mapsUrl)}">
       <div class="pc-hd">
-        <div class="pc-em">${emoji}</div>
-        <div><div class="pc-nm">${p.name}</div><div class="pc-tp">${p.category}</div></div>
+        <div class="pc-em">${escapeHtml(emoji)}</div>
+        <div><div class="pc-nm">${escapeHtml(p.name)}</div><div class="pc-tp">${escapeHtml(categoryLabel(p.category))}</div></div>
       </div>
-      <div class="pc-nt">${p.note||''}</div>
+      <div class="pc-nt">${escapeHtml(p.note||'')}</div>
       <div class="pc-tgs">
-        <span class="pc-t d">📍 ${p.distance!=null ? p.distance.toFixed(1)+'km' : '~2km'}</span>
-        ${p.rating?`<span class="pc-t r" style="color:var(--yellow);border-color:rgba(252,211,77,.25);background:rgba(252,211,77,.06)">⭐ ${p.rating}</span>`:''}
+        <span class="pc-t d">📍 ${p.distance!=null ? p.distance.toFixed(1)+' km from '+escapeHtml(stKey) : 'distance n/a'}</span>
+        ${p.provenance?`<span class="pc-t" title="Where this entry comes from">${escapeHtml(PROVENANCE_LABEL[p.provenance]||p.provenance)}</span>`:''}
+        ${p.rating?`<span class="pc-t r" style="color:var(--yellow);border-color:rgba(252,211,77,.25);background:rgba(252,211,77,.06)">⭐ ${escapeHtml(p.rating)}</span>`:''}
         <span class="pc-t gmaps">🗺 Open in Maps</span>
       </div>
     </div>`;
   }).join('');
+  // Delegated, attribute-free navigation: the URL is read from data-url, never evaluated as JS.
+  grid.querySelectorAll('.pc[data-url]').forEach(card =>
+    card.addEventListener('click', () => window.open(card.dataset.url, '_blank', 'noopener,noreferrer')));
 }
 
 export function openDrawer() { document.getElementById('drawer').classList.add('open'); }

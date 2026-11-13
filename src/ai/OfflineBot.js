@@ -66,6 +66,10 @@ export const BOT_KB = {
       ans:  `🟡 **Yellow Line (Inaugurated Aug 2025):**\n\nRoute: **RV Road ↔ Delta Electronics Bommasandra**\n16 stations · 19 km\n\nKey stations:\n• RV Road 🔄 (Green Line interchange)\n• Ragigudda\n• Jayadeva Hospital\n• BTM Layout\n• Central Silk Board (future Blue line)\n• Bommanahalli (HSR Layout area)\n• Electronic City\n• Infosys Konappana Agrahara\n• Biocon Hebbagodi\n• Bommasandra\n\n🔄 **Interchange at RV Road** with Green Line — same level, easiest interchange in the network!\n\n💡 Great for: BTM, HSR, Electronic City, Infosys, Biocon corridors`
     },
     {
+      keys: ['pink','pink line','kalena','hulimavu','iimb','tavarekere'],
+      ans:  `🩷 **Pink Line — Phase 1 (operational):**\n\nRoute: **Kalena Agrahara ↔ Tavarekere** · 6 stations · elevated\n\n• Kalena Agrahara\n• Hulimavu\n• Bilekahalli (IIM Bangalore)\n• JP Nagar 4th Phase\n• Jayadeva Hospital 🔄 (Yellow Line interchange)\n• Tavarekere\n\n🚧 **Phase 2** (underground, Tavarekere → Nagawara) is still under construction and is **not** part of any route yet.\n\nℹ️ Station details come from published reports and have not yet been confirmed against BMRCL.`
+    },
+    {
       keys: ['smart card','card','discount','token'],
       ans:  `🎫 **Smart Card vs Token:**\n\n**Smart Card:**\n• ₹100 refundable deposit + ₹50 minimum balance\n• **10% discount** on every ride\n• Recharge at any counter or kiosk\n• Tap-in tap-out — faster boarding\n• Available at all station counters\n\n**Single Journey Token:**\n• Buy at kiosk or counter\n• No discount\n• Use once and return\n\n**Verdict:** If you'll use metro more than 5 times, Smart Card pays for itself! 💚\n\n📱 Also available: **Namma Metro App** — QR tickets on your phone!`
     },

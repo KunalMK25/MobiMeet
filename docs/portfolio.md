@@ -7,7 +7,7 @@ the repository — resume, LinkedIn, a portfolio site, or an interview.
 
 ## Resume project description
 
-**MetroMeet AI — Fairness-First Transit Meetup Planner** *(personal project)*
+**MobiMeet — Fairness-First Transit Meetup Planner** *(personal project)*
 
 > Designed and built a graph-based meetup planner for Bangalore's metro
 > network from scratch: a weighted-graph Dijkstra routing engine, a custom
@@ -23,7 +23,7 @@ architecture with a full automated test suite.*
 
 ## LinkedIn project description
 
-> 🚇 **MetroMeet AI** — I built a meetup planner for Bangalore's Namma Metro
+> 🚇 **MobiMeet** — I built a meetup planner for Bangalore's Namma Metro
 > that answers a harder question than "what's the midpoint": *where can a
 > group meet such that no one person gets stuck with a brutal commute while
 > everyone else's is short?*
@@ -60,7 +60,7 @@ claude-api, static-site, vercel, no-framework
 
 ## Portfolio website description
 
-> **MetroMeet AI** is a full-stack-feeling client-side application that
+> **MobiMeet** is a full-stack-feeling client-side application that
 > solves a genuinely non-trivial optimization problem: finding a metro
 > station where a group of friends can meet without any one person bearing
 > an unfair travel burden. It combines classic graph algorithms (Dijkstra

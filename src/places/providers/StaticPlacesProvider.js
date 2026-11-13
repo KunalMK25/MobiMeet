@@ -30,7 +30,7 @@ export class StaticPlacesProvider {
       const partial = keys.find(k => stationKey.includes(k) || k.includes(stationKey.split(' ')[0]));
       list = partial ? this.db[partial] : null;
     }
-    if(!list) list = this.db['MG Road'] || [];
+    if(!list) list = [];   // no curated data for this station → say so (never show another station's venues)
 
     const st = ST[stationKey] || {};
     const wantAll = !categories || categories.includes('all');

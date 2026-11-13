@@ -3,8 +3,15 @@
 //  Relocated from the monolith, byte-identical body.
 // ═══════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
-//  COMPLETE STATION DATA  —  83 operational stations
+//  COMPLETE STATION DATA  —  83 stations on Purple/Green/Yellow (+ Pink once its section opens)
 // ═══════════════════════════════════════════════════════════
+import { isStationActive, activeLinesAt } from './network.js';
+
+// Operational flag for stations that may not be open yet (derived from the
+// status-driven network definition; evaluated once at load).
+const opNow = (name) => (isStationActive(name) ? 1 : 0);
+const PINK_NOW_ACTIVE = activeLinesAt('Jayadeva Hospital').includes('Pink');
+
 export const ST = {
   // ── PURPLE (37) ──
   "Whitefield":        {la:12.9959,lo:77.7503,li:"Purple",co:"#9b72f5",op:1},
@@ -74,13 +81,14 @@ export const ST = {
   "Yelachenahalli":    {la:12.8984,lo:77.5791,li:"Green",co:"#34d399",op:1},
   "Konanakunte Cross": {la:12.8872,lo:77.5782,li:"Green",co:"#34d399",op:1},
   "Doddakallasandra":  {la:12.8763,lo:77.5797,li:"Green",co:"#34d399",op:1},
+  "Vajarahalli":       {la:12.8697,lo:77.5810,li:"Green",co:"#34d399",op:1,approx:true,coordSource:"interpolated between Doddakallasandra and Thalaghattapura (unverified)"},
   "Thalaghattapura":   {la:12.8631,lo:77.5822,li:"Green",co:"#34d399",op:1},
   "Silk Institute":    {la:12.8479,lo:77.5848,li:"Green",co:"#34d399",op:1},
   // NOTE: Yelahanka, Hebbal, Nagawara are planned/future — NOT on current operational Green line
 
   // ── YELLOW (16, Aug 2025) ──
   "Ragigudda":         {la:12.9199,lo:77.6052,li:"Yellow",co:"#fbbf24",op:1},
-  "Jayadeva Hospital": {la:12.9140,lo:77.5878,li:"Yellow",co:"#fbbf24",op:1,note:"Future Pink interchange"},
+  "Jayadeva Hospital": {la:12.9140,lo:77.5878,li:PINK_NOW_ACTIVE?"Interchange":"Yellow",co:"#fbbf24",op:1,...(PINK_NOW_ACTIVE?{ix:"Yellow ↔ Pink"}:{note:"Pink interchange (opens with the Pink Line elevated section)"})},
   "BTM Layout":        {la:12.9072,lo:77.6101,li:"Yellow",co:"#fbbf24",op:1},
   "Central Silk Board":{la:12.9174,lo:77.6227,li:"Yellow",co:"#fbbf24",op:1,note:"Future Blue interchange"},
   "Bommanahalli":      {la:12.9116,lo:77.6316,li:"Yellow",co:"#fbbf24",op:1,aka:"HSR Layout area"},
@@ -94,4 +102,11 @@ export const ST = {
   "Huskur Road":       {la:12.8244,lo:77.6786,li:"Yellow",co:"#fbbf24",op:1},
   "Biocon Hebbagodi":  {la:12.8178,lo:77.6842,li:"Yellow",co:"#fbbf24",op:1,aka:"Hebbagodi"},
   "Bommasandra":       {la:12.8101,lo:77.6911,li:"Yellow",co:"#fbbf24",op:1,aka:"Delta Electronics"},
+  // ── PINK (elevated section; open from the date set in data/network.js) ──
+  // Coordinates are approximate area-level positions from OpenStreetMap (Nominatim), not surveyed station points.
+  "Kalena Agrahara":   {la:12.8658,lo:77.5912,li:"Pink",co:"#ec4899",op:opNow("Kalena Agrahara"),approx:true,coordSource:"osm-nominatim area"},
+  "Hulimavu":          {la:12.8773,lo:77.6028,li:"Pink",co:"#ec4899",op:opNow("Hulimavu"),approx:true,coordSource:"osm-nominatim area"},
+  "Bilekahalli IIMB":  {la:12.8956,lo:77.6026,li:"Pink",co:"#ec4899",op:opNow("Bilekahalli IIMB"),aka:"IIMB",approx:true,coordSource:"osm-nominatim area"},
+  "JP Nagar 4th Phase":{la:12.9080,lo:77.6005,li:"Pink",co:"#ec4899",op:opNow("JP Nagar 4th Phase"),aka:"NS Palya",approx:true,coordSource:"osm-nominatim area"},
+  "Tavarekere":        {la:12.9220,lo:77.6096,li:"Pink",co:"#ec4899",op:opNow("Tavarekere"),aka:"S.G. Palya / Suddagunte Palya",approx:true,coordSource:"osm-nominatim area; station name differs between sources"},
 };

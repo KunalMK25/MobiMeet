@@ -39,8 +39,11 @@ export const AM = {
   "South End Circle":"South End Circle","Jayanagar":"Jayanagar",
   "RV Road":"RV Road","JP Nagar":"JP Nagar","Banashankari":"Banashankari",
   "Yelachenahalli":"Yelachenahalli","Konanakunte":"Konanakunte Cross",
-  "Doddakallasandra":"Doddakallasandra","Thalaghattapura":"Thalaghattapura",
+  "Doddakallasandra":"Doddakallasandra","Vajarahalli":"Vajarahalli","Thalaghattapura":"Thalaghattapura",
   "Silk Institute":"Silk Institute",
+  // Pink (elevated section; only selectable once active)
+  "Kalena Agrahara":"Kalena Agrahara","Hulimavu":"Hulimavu","Bilekahalli IIMB":"Bilekahalli IIMB",
+  "JP Nagar 4th Phase":"JP Nagar 4th Phase","Tavarekere":"Tavarekere",
   // Yellow
   "Ragigudda":"Ragigudda","Jayadeva Hospital":"Jayadeva Hospital",
   "BTM Layout":"BTM Layout","Central Silk Board":"Central Silk Board",
@@ -52,10 +55,18 @@ export const AM = {
   "Bommasandra":"Bommasandra",
 };
 
-export const SEQS = {
-  Purple: ["Whitefield","Hopefarm","Kadugodi Tree Park","Pattandur Agrahara","Sri Sathya Sai","Nallurhalli","Kundalahalli","Seetharamapalya","Hoodi","Garudacharpalya","Singayyanapalya","Krishnarajapura","Benniganahalli","Baiyappanahalli","Swami Vivekananda","Indiranagar","Halasuru","Trinity","MG Road","Cubbon Park","Vidhana Soudha","Visvesvaraya","Majestic","City Railway Stn","Magadi Road","Hosahalli","Vijayanagar","Attiguppe","Deepanjali Nagar","Mysuru Road","Nayandahalli","RR Nagar","Jnanabharathi","Pattanagere","Kengeri Bus Stn","Kengeri","Challaghatta"],
-  // Single Green line: Madavara → Majestic → Silk Institute
-  Green: ["Madavara","Chikkabidarakallu","Manjunathanagara","Nagasandra","Dasarahalli","Jalahalli","Peenya Industry","Peenya","Goraguntepalya","Yeshwanthpur","Sandal Soap","Mahalakshmi","Sampige Road","Rajajinagar","Kuvempu Road","Srirampura","Majestic","Chickpete","KR Market","National College","Lalbagh","South End Circle","Jayanagar","RV Road","JP Nagar","Banashankari","Yelachenahalli","Konanakunte Cross","Doddakallasandra","Thalaghattapura","Silk Institute"],
-  // Yellow line: RV Road → Bommasandra
-  Yellow: ["RV Road","Ragigudda","Jayadeva Hospital","BTM Layout","Central Silk Board","Bommanahalli","Hongasandra","Kudlu Gate","Singasandra","Hosa Road","Beratena Agrahara","Electronic City","Konappana Agrahara","Huskur Road","Biocon Hebbagodi","Bommasandra"],
-};
+// Operational sequences are DERIVED from the status-driven network
+// definition (data/network.js): a line appears here only once at least one
+// of its sections is active, and only its active stations are listed.
+import { LINE_NAMES, activeSequence } from './network.js';
+
+export function buildSeqs(now = Date.now()) {
+  const out = {};
+  for (const line of LINE_NAMES) {
+    const seq = activeSequence(line, now);
+    if (seq.length) out[line] = seq;
+  }
+  return out;
+}
+
+export const SEQS = buildSeqs();

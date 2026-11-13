@@ -1,4 +1,4 @@
-import { GRAPH, STATION_LINES, nodeId } from './graph.js';
+import { DEFAULT_NETWORK, nodeId } from './graph.js';
 
 // for interchange edges, and is 0 for every same-line travel edge).
 /**
@@ -14,12 +14,12 @@ import { GRAPH, STATION_LINES, nodeId } from './graph.js';
  *   dist/ixCnt are keyed by plain station name; prev/bestNode are
  *   keyed by graph node id and used by getPath/getDetailedPath to
  *   reconstruct the actual route.
- * @complexity O(V log V + E) with the array-based priority queue
- *   used here degrading to O(V^2) in the worst case — acceptable at
- *   this graph's size (~90 nodes).
+ * @complexity O(V · E log E) in the worst case: the array-based queue is re-sorted on every pop instead of using a heap.
+ *   Fine at this graph's size (~90 nodes, ~200 edges); swap in a binary heap if the network grows by an order of magnitude.
  * @sideEffects None — reads only the module-level GRAPH/STATION_LINES.
  */
-export function dijkstra(srcKey) {
+export function dijkstra(srcKey, network = DEFAULT_NETWORK) {
+  const GRAPH = network.graph, STATION_LINES = network.stationLines;
   const dist     = {};   // nodeId -> min cost in minutes
   const ixCnt    = {};   // nodeId -> number of interchanges needed
   const prevNode = {};   // nodeId -> previous nodeId (for path reconstruction)

@@ -1,247 +1,51 @@
-<div align="center">
+# 🚇🏍️ MobiMeet
 
+**Personalised group meetup planning for Bengaluru — by Metro or by bike.**
+Everyone starts somewhere different. MobiMeet finds the meetup location where **nobody has to travel unfairly far**, shows each person's route, time and cost, explains *why* it chose that spot, and lets the group compare alternatives and "what-if" scenarios before confirming.
 
+It grew out of the original single-device Metro planner (still available at `/` as the **Quick Metro planner**, unchanged in behaviour) into a multi-user application: accounts, secure invitations, two transport modes, road-network routing, a deterministic fairness optimiser, venue discovery and optional LLM assistance that is never allowed to touch the numbers.
 
-# 🚇 MetroMeet AI
+## What it does
+* **Groups & invitations** — create a group, choose **Metro** *or* **Bike** (one mode per group, enforced by the API *and* the database, locked after creation), share an expiring, revocable, single-view invitation link. Each person sets their own starting point and preferences for that group.
+* **Metro** — line-aware Dijkstra with per-person route strategies (fastest / fewest changes / lowest fare) and a schematic route map over the Namma Metro network (Purple, Green, Yellow, and the **Pink Line** elevated section, which switches on automatically on its opening date; underground sections stay excluded until opened). Walking to the nearest *several* stations is considered, not just the nearest one.
+* **Bike** — real road distances/times from an OSRM-compatible provider (configurable), geographic candidates refined once around the best, route geometry, and a fuel-cost estimate **only if you supply mileage and price** (never invented).
+* **Fairness-first optimisation** — minimises the worst individual journey first; reports range, standard deviation and Jain's fairness index; five strategies (balanced, fastest, cheapest, fewest transfers, balanced time/cost); hard limits per person; reproducible results.
+* **Explainability** — decision explanations generated from the optimiser's own numbers, plus limitations (e.g. "times are estimates, not live traffic").
+* **Venues** — places near the meetup point from OpenStreetMap; labelled sample data if live data is unavailable. Nothing is invented.
+* **What-if** — add/remove people, move a start point, change strategy; scenarios are stored separately and never touch the group or a confirmed plan. Plans are versioned; confirming a new plan supersedes (never overwrites) the old one.
+* **Optional AI** (server-side keys; Groq, Anthropic or OpenAI): re-word explanations (numbers verified against the facts), suggest preferences from a note (validated, never auto-applied), answer questions about the plan. Everything works without a key.
+* **Offline** — app shell and the classic planner work offline; the last viewed plan is kept on the device with a staleness warning.
+* **Accessible & responsive** — labelled controls, keyboard focus styles, no colour-only status, mobile layout.
 
-**A fairness-first meetup planner for the Bangalore Namma Metro.**
-Find the station where *nobody* has to travel unfairly far — with a live
-schematic map, a context-aware AI assistant, and real nearby-hangout data.
+### Personal agents (no group chat)
+Each participant has their **own** lightweight agent. You tell *your* agent things like “I’m running 15 minutes late”; it records the fact, decides what the group needs to know (never your words), and publishes a structured update to a shared event log that the other participants’ agents read. Ask your agent “What happened to Asha?” and it answers from what Asha chose to share. The plan creator names the participants; one invitation link serves everyone and each person claims their own name once. See `ARCHITECTURE.md`.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build: no bundler](https://img.shields.io/badge/build-no%20bundler-blue)](docs/deployment.md)
-[![Diagnostics](https://img.shields.io/badge/diagnostics-29%2F29%20passing-brightgreen)](docs/diagnostics.md)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](package.json)
-[![Deploy with Vercel](https://img.shields.io/badge/deploy-vercel-black?logo=vercel)](https://vercel.com/new)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
-
-</div>
-
----
-
-## Overview
-
-You and five friends are scattered across Bangalore's Namma Metro network and
-want to meet up. Who has to travel the furthest? Which station is actually
-*fair* to everyone — not just the one with the lowest total travel time?
-Is there anywhere decent to hang out near it?
-
-**MetroMeet AI answers all three at once.** Add your friends' home stations,
-pick a vibe (cafe, mall, park, bar…), and it finds the meetup point that
-minimizes the worst-case journey while keeping everyone's travel time close
-together — then shows you the exact route, fare, and interchanges each
-person needs, on a live schematic map, with an AI assistant that can explain
-*why* it picked that station.
-
-## Motivation
-
-Most "find a midpoint" tools either average raw coordinates (which ignores
-how transit actually works) or minimize total distance (which can strand one
-person with a brutal commute so the group average looks good). This project
-treats meetup-finding as a genuine **graph + fairness optimization problem**
-over the real metro network — plus enough surrounding product (map, AI,
-places, diagnostics) to make it feel like a finished tool rather than a
-script.
-
-## Features
-
-- 🗺️ **Schematic metro map** — BMRCL-style rendering (even stop-spacing, not
-  raw geography), pan/zoom, hover tooltips, friend & meetup markers
-- 🧮 **Fairness-first optimization** — minimizes the *worst* individual
-  journey, not just the total, with nearby-hangout quality as a tie-breaker
-- 🛤️ **Real weighted-graph routing** — Dijkstra over a line-aware graph where
-  interchange penalties fall out of the graph structure, never hardcoded
-- 🔍 **Searchable station autocomplete** — keyboard + mouse navigable,
-  matches names, partial words, and common abbreviations (MG, JP, KR…)
-- 🤖 **Context-aware AI assistant** — answers questions like *"why this
-  station?"* or *"who travels longest?"* from real computed data first, with
-  a live Claude fallback for anything else, and a fully offline bot as the
-  last resort
-- 📍 **Live nearby-places data** — OpenStreetMap Overpass API with automatic
-  fallback to a curated static dataset, cached per station
-- 🧪 **29-test diagnostics suite** — DEBUG-gated, covers every subsystem,
-  zero production overhead when disabled
-- ⚡ **Cached rendering pipeline** — offscreen static bitmap, scale-keyed
-  label-collision cache, rAF-coalesced redraws
-- 🚩 **Feature flags** for AI, live places, render caching, diagnostics, and
-  the performance overlay — independently toggleable, no code changes needed
-
-
-## Architecture
-
-```
-data → core → places → rendering → ai → ui → main
-                                              ↑
-                              diagnostics (may depend on everything;
-                              nothing may depend on diagnostics)
-```
-
-Full breakdown, module responsibilities, and a Mermaid dependency diagram:
-**[`docs/architecture.md`](docs/architecture.md)**.
-
-## Folder structure
-
-```
-metromeet-ai/
-├── index.html                 # single HTML entry point
-├── src/
-│   ├── main.js                 # app bootstrap, wires window.* handlers
-│   ├── core/                   # graph, Dijkstra, routing, fares, optimization
-│   ├── data/                   # station coordinates, line sequences, places DB
-│   ├── places/                 # pluggable nearby-places providers
-│   │   └── providers/
-│   ├── rendering/               # schematic map engine (viewport/scheduler/labels/overlays)
-│   ├── ai/                     # context builder, direct answers, Claude, offline bot
-│   ├── ui/                     # DOM glue — friends panel, drawer, chat, autocomplete, map controls
-│   ├── diagnostics/             # DEBUG-gated test suite, perf monitor, logger, error boundary
-│   ├── config/                 # feature flags, version metadata, constants
-│   └── utils/                  # small stateless helpers
-├── docs/                       # architecture, algorithms, deployment, API reference, diagrams
-│   └── screenshots/
-├── scripts/                    # build.js, verify.js (no bundler — see docs/deployment.md)
-├── .github/                    # issue/PR/discussion templates
-├── package.json
-└── vercel.json
-```
-
-## Technology stack
-
-- **Vanilla JavaScript (ES2022+), native ES modules** — no framework, no
-  bundler, no transpiler
-- **HTML5 Canvas** for the map renderer
-- **Anthropic Claude API** for the AI assistant (with graceful offline
-  fallback)
-- **OpenStreetMap Overpass API** for live places data (with static fallback)
-- **Vercel** for zero-config static deployment
-
-See [`docs/deployment.md`](docs/deployment.md) for why there's deliberately
-no bundler.
-
-## Algorithms
-
-Weighted-graph Dijkstra routing + a fairness-first meetup optimizer. Full
-write-up with complexity analysis and Mermaid flowcharts:
-**[`docs/algorithms.md`](docs/algorithms.md)**.
-
-## AI features
-
-A structured app-state snapshot feeds a data-grounded direct-answer layer
-first (zero network calls, zero hallucination risk for computed facts), then
-falls through to a real Claude API call, then an offline rule-based bot.
-**[`docs/ai.md`](docs/ai.md)**.
-
-## Places provider
-
-Pluggable provider interface (`getNearbyPlaces(station, categories)`) with a
-live OpenStreetMap provider, a curated static fallback, and a Google Places
-stub for future use — automatic fallback and per-station caching.
-**[`docs/places.md`](docs/places.md)**.
-
-## Rendering engine
-
-Schematic (evenly-spaced) map layout, cached offscreen static bitmap, and a
-zoom/size-keyed label-collision cache. **[`docs/renderer.md`](docs/renderer.md)**.
-
-## Diagnostics
-
-29 automated tests across 6 suites, DEBUG-gated and completely isolated from
-production code paths. **[`docs/diagnostics.md`](docs/diagnostics.md)**.
-
-## Performance optimizations
-
-rAF-coalesced redraw scheduling, multi-layer caching, non-invasive timing
-instrumentation, and a developer overlay.
-**[`docs/performance.md`](docs/performance.md)**.
-
-## Installation
-
+## Quick start
 ```bash
-git clone https://github.com/<your-username>/metromeet-ai.git
-cd metromeet-ai
 npm install
+npm run dev:full      # → http://localhost:3000/app/     (classic planner: http://localhost:3000/)
+npm run env:check     # what is set / missing (names only — never prints secrets, makes no network calls)
+npm run check         # ESLint + static verification + 200 unit / integration / UI tests
+npm run build         # → dist/ (static site; the API deploys as a Vercel function)
 ```
+No accounts or keys are needed locally: the dev server uses an embedded PostgreSQL (PGlite). Optional environment variables are listed in [`.env.example`](.env.example).
 
-### Running locally
+## Documentation
+| | |
+|---|---|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | components, layering, data model, security & privacy model |
+| [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) | every endpoint, error codes, result shapes |
+| [`DEPLOYMENT.md`](DEPLOYMENT.md) | local setup, environment variables, Neon database, routing and email options, AI cost controls, Vercel preview steps |
+| [`DATA_SOURCES.md`](DATA_SOURCES.md) | metro, map, routing and venue sources, verification status |
+| [`MobiMeet_AI_Build_Spec_v2.0.md`](MobiMeet_AI_Build_Spec_v2.0.md) | the product/engineering specification |
+| `docs/*.md` | original planner design docs (algorithms, renderer, places, diagnostics, performance) |
 
-```bash
-npm run dev
-# → http://localhost:3000
-```
-
-No API keys or environment variables are required — both the AI assistant
-and the Places provider degrade gracefully to offline/static fallbacks.
-
-### Development mode
-
-Enable the diagnostics suite and developer overlay by editing
-`src/config/FeatureFlags.js`:
-
-```js
-export const DEBUG = true;
-```
-
-Then, in the browser console: `await runDiagnostics()`.
-
-### Production build
-
-```bash
-npm run build     # → dist/
-npm start          # serve dist/ locally to sanity-check
-npm run verify      # static check: imports resolve, no circular deps, no syntax errors
-```
-
-### Deployment to Vercel
-
-```bash
-npm install -g vercel
-vercel --prod
-```
-
-Or connect the GitHub repo in the Vercel dashboard — `vercel.json` already
-sets `buildCommand`/`outputDirectory` correctly. Full guide:
-**[`docs/deployment.md`](docs/deployment.md)**.
-
-### GitHub Pages compatibility
-
-Fully static output means GitHub Pages works too — see
-[`docs/deployment.md`](docs/deployment.md#github-pages-compatibility).
-
-## How to contribute
-
-See **[`CONTRIBUTING.md`](CONTRIBUTING.md)** for the project's dependency
-rules, how to add a new Places provider or Diagnostics test, and the PR
-checklist. Please also read the **[Code of Conduct](CODE_OF_CONDUCT.md)**.
+## Honest limitations and next steps
+* Times and fares are **estimates** (flat minutes per hop, stop-count fare slabs, free-flow road times — no live trains or traffic). Metro network facts come from published secondary sources and are **not yet verified against BMRCL**; the Pink Line Phase 1 opening date (13 Nov 2026 per the project owner; news reports say public service from 14 Nov) and the Tavarekere / S.G. Palya naming are unresolved; some coordinates are approximate. Step-free access is recorded but cannot be applied (no data). No ML model is trained (no legitimate dataset).
+* Station records are still keyed by display name internally (stable IDs exist at every boundary); the offline chatbot text and static HTML still describe only some lines; per-segment travel times and distance-based fares are not implemented.
+* Bike routing: the public OSRM demo is development-only and uses a **car** profile; production needs `ROUTING_MODE=estimate` or your own routing server (see `DEPLOYMENT.md`). Live venue lookups depend on public Overpass servers; a saved OpenStreetMap snapshot (covers 70 of 88 stations) is used and labelled when they are unreachable.
+* Updates between agents arrive by polling (about every 15 seconds while a page is open) — no push or email notifications. A forwarded invitation link can be used by the wrong person to claim an *unclaimed* name; the plan creator sees which account holds each seat and can release it. Plans show each member's route to the meetup, which implies their start area (the join screen says so).
+* Next steps: verify Metro data with BMRCL; segment times and distance-based fares; stable IDs as internal graph keys; a production routing provider; a click-to-pick map for Bike; Playwright end-to-end tests and a type-check pipeline; an evaluated ML model only if real, consented trip data exists (obtain data with documented provenance and licence → define target and leakage checks → beat the deterministic baseline on held-out data → record a model card → register it).
 
 ## License
-
-[MIT](LICENSE) © MetroMeet AI Contributors
-
-## Acknowledgements
-
-- Bangalore Metro Rail Corporation Limited (BMRCL) for the public network
-  data this project models
-- [OpenStreetMap](https://www.openstreetmap.org/) contributors, via the
-  Overpass API
-- [Anthropic](https://www.anthropic.com/) Claude API for the AI assistant
-
-## Future roadmap
-
-- [ ] Real Google Places API integration (stub already scaffolded)
-- [ ] Live train position overlay (rendering layer is designed for this —
-      see [`docs/renderer.md`](docs/renderer.md#future-extensibility))
-- [ ] Additional metro lines (Blue, Pink, Airport) as BMRCL expands —
-      architecture supports this as a config-only change (see
-      [`docs/algorithms.md`](docs/algorithms.md))
-- [ ] Shareable meetup links (encode friends+vibe in a URL)
-- [ ] PWA / offline-first support
-
----
-
-<div align="center">
-
-Built as a full-stack systems project — see
-**[`docs/portfolio.md`](docs/portfolio.md)** for design decisions, trade-offs,
-and interview talking points.
-
-</div>
+[MIT](LICENSE). Map data © OpenStreetMap contributors (ODbL).

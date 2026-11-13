@@ -19,8 +19,9 @@ import { APP_VERSION } from './config/Version.js';
 import { Logger } from './diagnostics/Logger.js';
 import { PerfMonitor } from './diagnostics/PerformanceMonitor.js';
 
+import { ST } from './data/stations.js';
 import { friends, lastResult, vibe } from './rendering/state.js';
-import { canvas, ctx, vpX, vpY, vpScale, resize, resetView, zoom } from './rendering/viewport.js';
+import { canvas, vpX, vpY, vpScale, resize, resetView, zoom } from './rendering/viewport.js';
 import { hoveredStationKey } from './rendering/overlays.js';
 import { lastStaticVpKey } from './rendering/renderer.js';
 import { labelLayoutCache } from './rendering/labels.js';
@@ -30,7 +31,7 @@ import './rendering/renderer.js'; // self-registers with the scheduler on import
 import { _nearbyPlacesCache } from './places/PlacesService.js';
 
 import { addFriend, removeFriend } from './ui/FriendsPanel.js';
-import { setVibe, findMeet, openDrawer, closeDrawer, toggleRouteDetail, sw } from './ui/Drawer.js';
+import { setVibe, findMeet, openDrawer, closeDrawer, toggleRouteDetail, sw, setPlacesRadius } from './ui/Drawer.js';
 import { sendMsg, qa, ck, ar } from './ui/Chat.js';
 import { attachStationAutocomplete } from './ui/Autocomplete.js';
 import './ui/MapControls.js'; // side-effect import: registers canvas pan/zoom/touch handlers
@@ -43,6 +44,7 @@ import './ui/MapControls.js'; // side-effect import: registers canvas pan/zoom/t
 window.addFriend = addFriend;
 window.removeFriend = removeFriend;
 window.setVibe = setVibe;
+window.setPlacesRadius = setPlacesRadius;
 window.findMeet = findMeet;
 window.openDrawer = openDrawer;
 window.closeDrawer = closeDrawer;
@@ -54,6 +56,20 @@ window.ck = ck;
 window.ar = ar;
 window.resetView = resetView;
 window.zoom = zoom;
+
+// Keep the static "N Stations" label in sync with the operational network
+// (Pink Line stations join the count automatically once their section opens).
+{
+  const n = Object.values(ST).filter(x => x.op).length;
+  const lbl = document.getElementById('liveLinesLbl');
+  if (lbl) lbl.textContent = `Live Lines · ${n} Stations`;
+}
+
+// Pink Line Phase 1 panel + legend appear exactly when its stations are operational (same flag the map and router use).
+{
+  const live = !!ST['Kalena Agrahara']?.op;
+  for (const id of ['pinkLiveCard', 'pinkLegend']) { const el = document.getElementById(id); if (el) el.hidden = !live; }
+}
 
 // Station search autocomplete for the "Add Your Crew" area field
 attachStationAutocomplete(
@@ -174,7 +190,7 @@ window.APP_VERSION = APP_VERSION;
 // ── Boot ──────────────────────────────────────────────────────
 window.addEventListener('load', async () => {
   resize();
-  Logger.info('App', `MetroMeet AI ${APP_VERSION.appVersion} booted`, { buildDate: APP_VERSION.buildDate });
+  Logger.info('App', `MobiMeet ${APP_VERSION.appVersion} booted`, { buildDate: APP_VERSION.buildDate });
 
   if (DEBUG && FEATURE_FLAGS.DIAGNOSTICS) {
     const { Diagnostics } = await import('./diagnostics/Diagnostics.js');

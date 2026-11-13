@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MobiMeet</title>
+  <meta name="description" content="Find a fair meetup point for your group — by Metro or by bike.">
+  <meta name="theme-color" content="#04060e">
+  <!-- Same typefaces as the Quick Metro planner. Fonts are the only third-party resource; the page works with system fonts if they fail to load. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <a class="skip" href="#view">Skip to content</a>
+  <div class="stripe" aria-hidden="true"></div>
+  <header class="top"><nav id="nav" aria-label="Main"></nav></header>
+  <div id="offline-banner" class="banner warn" role="status" hidden>You are offline. Saved plans can still be viewed; creating groups, joining and fresh routing need a connection.</div>
+  <main id="view" tabindex="-1"><noscript>MobiMeet needs JavaScript.</noscript></main>
+  <div id="status" class="sr-only" aria-live="polite"></div>
+  <footer class="foot">Map data © OpenStreetMap contributors (ODbL). Travel times and costs are estimates, not live traffic or live fares.</footer>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

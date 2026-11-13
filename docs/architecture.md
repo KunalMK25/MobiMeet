@@ -1,6 +1,6 @@
 # Architecture
 
-MetroMeet AI is a **single-page, build-tool-free application** written entirely in
+MobiMeet is a **single-page, build-tool-free application** written entirely in
 native ES modules. There is no bundler, no framework, and no transpilation step —
 `index.html` loads `src/main.js` via `<script type="module">`, and the browser
 resolves every `import` directly over HTTP.

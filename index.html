@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MetroMeet AI — Namma Metro Bangalore</title>
+<title>MobiMeet — Namma Metro Bangalore</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 :root{
@@ -295,7 +295,7 @@ select option{background:var(--card2);color:var(--text)}
 <aside class="sb">
   <div class="logo">
     <div class="logo-mark">🚇</div>
-    <div><h1>Metro<em>Meet</em></h1><p>Namma Metro · AI Edition</p></div>
+    <div><h1>Mobi<em>Meet</em></h1><p>Namma Metro · Quick Planner</p></div>
   </div>
   <div class="tabs">
     <button class="tab on"  onclick="sw('friends',this)">👥 Friends</button>
@@ -316,16 +316,18 @@ select option{background:var(--card2);color:var(--text)}
     <div class="vrow">
       <button class="vc on" onclick="setVibe(this,'all')">🌟 All</button>
       <button class="vc" onclick="setVibe(this,'mall')">🛍️ Mall</button>
-      <button class="vc" onclick="setVibe(this,'cafe')">☕ Cafe</button>
-      <button class="vc" onclick="setVibe(this,'arcade')">🕹️ Arcade</button>
       <button class="vc" onclick="setVibe(this,'restaurant')">🍽️ Food</button>
+      <button class="vc" onclick="setVibe(this,'cafe')">☕ Cafe</button>
+      <button class="vc" onclick="setVibe(this,'bar')">🍻 Pubs</button>
+      <button class="vc" onclick="setVibe(this,'club')">🪩 Clubs</button>
+      <button class="vc" onclick="setVibe(this,'entertainment')">🎳 Fun</button>
       <button class="vc" onclick="setVibe(this,'park')">🌳 Park</button>
-      <button class="vc" onclick="setVibe(this,'bar')">🍻 Bar</button>
+      <button class="vc" onclick="setVibe(this,'attraction')">📍 Sights</button>
     </div>
     <button class="btn-find" id="findBtn" onclick="findMeet()" disabled>🚇 Find Best Meet Point</button>
   </div>
   <div class="panel" id="p-lines" style="display:none">
-    <div class="lbl">Live Lines · 83 Stations</div>
+    <div class="lbl" id="liveLinesLbl">Live Lines · 83 Stations</div>
     <div class="lb">
       <div class="lb-hd"><div class="ldot" style="background:var(--purple);color:var(--purple)"></div>
         <strong style="font-size:.84rem">Purple Line</strong>
@@ -341,11 +343,15 @@ select option{background:var(--card2);color:var(--text)}
         <strong style="font-size:.84rem">Yellow Line <span class="new-b">AUG 2025</span></strong>
         <span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">16 stn · 19 km</span></div>
       <p>RV Road ↔ Delta Electronics Bommasandra<br>Interchange: <span style="color:var(--yellow)">RV Road</span> (Green)</p></div>
+    <div class="lb" id="pinkLiveCard" hidden>
+      <div class="lb-hd"><div class="ldot" style="background:var(--pink);color:var(--pink)"></div>
+        <strong style="font-size:.84rem">Pink Line · Phase 1 <span class="new-b">NEW</span></strong><span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">6 stn</span></div>
+      <p>Kalena Agrahara ↔ Tavarekere · elevated<br>Interchange: <span style="color:var(--pink)">Jayadeva Hospital</span> (Yellow)</p></div>
     <div class="lbl" style="margin-top:6px">Upcoming</div>
     <div class="lb" style="opacity:.75;border-color:rgba(249,168,212,.2)">
       <div class="lb-hd"><div class="ldot" style="background:var(--pink);color:var(--pink)"></div>
-        <strong style="font-size:.84rem">Pink Line</strong><span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">~18 stn</span></div>
-      <p>Gottigere ↔ Nagawara · Jayadeva interchange</p></div>
+        <strong style="font-size:.84rem">Pink Line · Phase 2</strong><span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">12 stn</span></div>
+      <p>Tavarekere ↔ Nagawara · underground · under construction (not routed)</p></div>
     <div class="lb" style="opacity:.75;border-color:rgba(96,165,250,.2)">
       <div class="lb-hd"><div class="ldot" style="background:var(--blue);color:var(--blue)"></div>
         <strong style="font-size:.84rem">Blue Line</strong><span style="margin-left:auto;font-size:.58rem;font-family:'DM Mono',monospace;color:var(--muted2)">~30 stn</span></div>
@@ -353,7 +359,7 @@ select option{background:var(--card2);color:var(--text)}
     <div class="lbl" style="margin-top:6px">Key Interchanges</div>
     <div class="lb"><strong style="font-size:.8rem">🔄 Majestic (Nadaprabhu Kempegowda)</strong><p style="margin-top:4px">Purple ↔ Green · Underground→Elevated · ~5 min walk · Gate 5 for Purple exit</p></div>
     <div class="lb"><strong style="font-size:.8rem">🔄 RV Road (Rashtreeya Vidyalaya Road)</strong><p style="margin-top:4px">Green ↔ Yellow · Same-level transfer · Easiest interchange!</p></div>
-    <div class="lb"><strong style="font-size:.8rem">🔄 Jayadeva Hospital (future)</strong><p style="margin-top:4px">Yellow ↔ Pink · India's tallest metro station at 39m!</p></div>
+    <div class="lb"><strong style="font-size:.8rem">🔄 Jayadeva Hospital</strong><p style="margin-top:4px">Yellow ↔ Pink (Phase 1) · India's tallest metro station at 39m!</p></div>
   </div>
   <div class="panel" id="p-guide" style="display:none">
     <div class="lbl">How to Ride</div>
@@ -378,6 +384,7 @@ select option{background:var(--card2);color:var(--text)}
     <div class="leg-row"><div class="leg-line" style="background:var(--purple)"></div>Purple</div>
     <div class="leg-row"><div class="leg-line" style="background:var(--green)"></div>Green</div>
     <div class="leg-row"><div class="leg-line" style="background:var(--yellow)"></div>Yellow ✨</div>
+    <div class="leg-row" id="pinkLegend" hidden><div class="leg-line" style="background:var(--pink)"></div>Pink ✨</div>
     <div class="leg-row"><div class="leg-dot" style="background:var(--green)"></div>Interchange</div>
     <div class="leg-row"><div class="leg-dot" style="background:var(--accent)"></div>Meet Point</div>
   </div>
@@ -387,7 +394,7 @@ select option{background:var(--card2);color:var(--text)}
 <aside class="chat">
   <div class="chat-hd"><div class="orb">🤖</div><div><h3>MetroBot</h3><p>AI Guide · All 3 Lines</p></div><div class="dot"></div></div>
   <div class="msgs" id="msgs">
-    <div class="msg ai"><div class="bubble">Hey! 👋 I'm <strong>MetroBot</strong> — your AI guide to all 83 stations of Namma Metro.<br><br>I cover:<br>• 🗺 Routes &amp; interchanges<br>• 🟡 New Yellow Line (Aug 2025)<br>• 💰 Fares, timings, smart card<br>• 🍽 Best spots near any station<br><br>Ask me anything!</div><div class="msg-t">MetroBot · now</div></div>
+    <div class="msg ai"><div class="bubble">Hey! 👋 I'm <strong>MetroBot</strong> — your guide to every Namma Metro station.<br><br>I cover:<br>• 🗺 Routes &amp; interchanges<br>• 🟡 New Yellow Line (Aug 2025)<br>• 💰 Fares, timings, smart card<br>• 🍽 Best spots near any station<br><br>Ask me anything!</div><div class="msg-t">MetroBot · now</div></div>
   </div>
   <div class="qps">
     <button class="qp" onclick="qa('How to go from Whitefield to Electronic City by metro?')">Whitefield→EC?</button>
