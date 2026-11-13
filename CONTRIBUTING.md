@@ -7,8 +7,8 @@ before opening a PR so your change fits the project's grain.
 ## Getting started
 
 ```bash
-git clone https://github.com/<your-username>/metromeet-ai.git
-cd metromeet-ai
+git clone https://github.com/<your-username>/MobiMeet.git
+cd MobiMeet
 npm install
 npm run dev      # http://localhost:3000
 npm run verify    # check imports/exports/circular deps before you start

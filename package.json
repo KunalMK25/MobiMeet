@@ -1,18 +1,18 @@
 {
-  "name": "metromeet-ai",
+  "name": "mobimeet",
   "version": "7.0.0-dev",
   "description": "MobiMeet — personalised group meetup planning for Bengaluru by Metro or Bike: fairness-first optimisation, secure groups and invitations, road-network routing, venue discovery and explainable recommendations. Evolution of MobiMeet.",
   "type": "module",
   "private": true,
   "license": "MIT",
   "author": "MobiMeet Contributors",
-  "homepage": "https://github.com/<your-username>/metromeet-ai#readme",
+  "homepage": "https://github.com/KunalMK25/MobiMeet#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/<your-username>/metromeet-ai.git"
+    "url": "https://github.com/KunalMK25/MobiMeet.git"
   },
   "bugs": {
-    "url": "https://github.com/<your-username>/metromeet-ai/issues"
+    "url": "https://github.com/KunalMK25/MobiMeet/issues"
   },
   "keywords": [
     "bangalore",

@@ -31,7 +31,7 @@ If you discover a security issue (e.g. an XSS vector in rendered content, a
 way to exfiltrate data via the AI context, a dependency vulnerability),
 please **do not open a public issue**. Instead:
 
-1. Use GitHub's [private vulnerability reporting](https://github.com/KunalMK25/metromeet-ai/security/advisories/new)
+1. Use GitHub's [private vulnerability reporting](https://github.com/KunalMK25/MobiMeet/security/advisories/new)
    feature for this repository, **or**
 2. Email the maintainer listed in `package.json`'s `author` field.
 

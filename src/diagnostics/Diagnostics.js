@@ -99,7 +99,7 @@ export const Diagnostics = (function(){
   }
 
   function printReport(report){
-    console.log('%c═══ METROMEET DIAGNOSTICS REPORT ═══', 'font-weight:bold;color:#67e7fb');
+    console.log('%c═══ MOBIMEET DIAGNOSTICS REPORT ═══', 'font-weight:bold;color:#67e7fb');
     for (const r of report.results){
       const mark = r.status==='pass' ? '✓' : '✗';
       console.log(`${mark} [${r.suite}] ${r.name}${r.error?' — '+r.error:''} (${r.ms}ms)`);

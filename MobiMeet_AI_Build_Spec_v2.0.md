@@ -3,7 +3,7 @@
 **Version:** 2.0  
 **Date:** 13 November 2026  
 **Project:** MobiMeet AI (evolution of MetroMeet AI)  
-**Existing baseline repository:** https://github.com/KunalMK25/metromeet-ai  
+**Existing baseline repository:** https://github.com/KunalMK25/MobiMeet  
 **Existing deployment:** https://metromeet-ai.vercel.app/
 
 ---
@@ -97,7 +97,7 @@ MobiMeet AI should:
 5. Modularity: new lines, stations, routing providers, ML models and venue providers must be addable without rewriting the application.
 6. Privacy and security for participant locations and group details.
 7. Graceful degradation when external services fail.
-8. Preserve and extend the working MetroMeet baseline.
+8. Preserve and extend the working MobiMeet baseline.
 
 ---
 
@@ -141,7 +141,7 @@ MobiMeet AI should:
 
 # 3. Repository Audit — Mandatory First Step
 
-**Repository:** https://github.com/KunalMK25/metromeet-ai  
+**Repository:** https://github.com/KunalMK25/MobiMeet  
 **Existing deployment:** https://metromeet-ai.vercel.app/
 
 The repository determines the current technical implementation.
@@ -269,7 +269,7 @@ Reject or safely handle expired/revoked invitations, closed groups, invalid mode
 
 ## 6.1 Purpose
 
-Calculate feasible journeys over the configured Bengaluru Metro network and evaluate candidate meetup stations for every participant. Reuse the existing MetroMeet graph and routing implementation wherever sound.
+Calculate feasible journeys over the configured Bengaluru Metro network and evaluate candidate meetup stations for every participant. Reuse the existing MobiMeet graph and routing implementation wherever sound.
 
 ## 6.2 Graph representation
 
@@ -503,7 +503,7 @@ Provide clear account/profile experience, Create Group, Metro/Bike selection, in
 
 ## 12.2 Metro map
 
-Preserve and improve the existing MetroMeet map where appropriate:
+Preserve and improve the existing MobiMeet map where appropriate:
 - Stations and lines.
 - Distinction between operational and planned sections.
 - Selected participant routes.
@@ -685,7 +685,7 @@ Test:
 
 ## 19.4 Regression tests
 
-Existing MetroMeet station search, map rendering, route display/calculations, fare/time calculations, places experience and fairness functionality must remain functional.
+Existing MobiMeet station search, map rendering, route display/calculations, fare/time calculations, places experience and fairness functionality must remain functional.
 
 ## 19.5 Build and verification
 
@@ -765,7 +765,7 @@ Complete regression/integration/end-to-end tests, security/privacy review, provi
 # 21. Acceptance Criteria
 
 ## 21.1 Existing baseline
-- Working MetroMeet features remain available.
+- Working MobiMeet features remain available.
 - Map and route experiences are not regressed.
 - Existing verification/build passes, or pre-existing failures are documented and not worsened.
 
